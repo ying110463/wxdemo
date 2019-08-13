@@ -1,18 +1,22 @@
 // pages/goods_detail/index.js
+import {
+  request
+} from "../../request/index.js";
+import { getStorageCart,setStorageCart  } from "../../utils/storage.js";
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+    goodsObj: {}
   },
-
+  GoodsInfo: {},
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {
-
+  onLoad(options) {
+    this.getGoodsDetail(options.goods_id)
   },
 
   /**
@@ -21,46 +25,54 @@ Page({
   onReady: function () {
 
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
+  getGoodsDetail(goods_id) {
+    request({
+      url: "/goods/detail",
+      data: {
+        goods_id
+      }
+    }).then(result => {
+ 
+      this.GoodsInfo = result
+      this.setData({
+        goodsObj: {
+          goods_name: result.goods_name,
+          goods_price: result.goods_price,
+          goods_introduce: result.goods_introduce.replace(/\.webp/g, '.jpg'),
+          pics: result.pics
+        }
+      })
+    })
   },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
+  handlePreviewImage(e) {
+    const {
+      index
+    } = e.currentTarget.dataset;
+    const urls = this.data.goodsObj.pics.map(v => v.pics_big);
+    const current = urls[index];
+    wx.previewImage({
+      current,
+      urls
+    });
   },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
+  handleCartAdd() {
+    let cart = getStorageCart() || {}
+   
+    if (cart[this.GoodsInfo.goods_id] ) {
+      cart[this.GoodsInfo.goods_id].num++;
+    } else {
+      cart[this.GoodsInfo.goods_id] = this.GoodsInfo;
+      cart[this.GoodsInfo.goods_id].num=1;
+      cart[this.GoodsInfo.goods_id].checked=true;
+    }
+    setStorageCart(cart)
+    wx.showToast({
+      title: '添加成功',
+      icon: 'none',
+      mask: true,
+    });
 
   }
+  
+ 
 })

@@ -1,66 +1,53 @@
 // pages/auth/index.js
+import {
+  request
+} from "../../request/index.js";
+import {
+  wxLogin
+} from "../../utils/storage";
 Page({
 
-  /**
-   * 页面的初始数据
-   */
-  data: {
+  getUserInfo(e) {
+    console.log(e)
 
-  },
+    const {
+      signature,
+      iv,
+      rawData,
+      encryptedData
+    } = e.detail;
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
+    let postParams = {
+      signature,
+      iv,
+      rawData,
+      encryptedData,
 
-  },
+    };
+    wxLogin().then(res => {
+      const {
+        code
+      } = res
+      const {
+        token
+      } = request({
+        url: "/users/wxlogin",
+        data: {
+          postParams,
+          code
+        },
+        method: "post"
+      })
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
+      wx.setStorageSync("token", token);
+      wx.navigateTo({
+        detail: 1
+      });
+    })
+    // console.log(token)
 
-  },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
 
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
 
   }
 })
